@@ -60,16 +60,6 @@ function LoginPage() {
           </div>
           <span className="text-base font-medium tracking-tight">Contest Reminder</span>
         </div>
-        <div className="hidden items-center gap-1 rounded-full border border-gray-700 px-2 py-1.5 text-sm text-white/80 lg:flex">
-          {["Home", "Platforms", "Contests", "Pricing", "Blog"].map((l) => (
-            <a key={l} href="#" className="rounded-full px-3 py-1 transition hover:text-white">
-              {l}
-            </a>
-          ))}
-          <a href="#" className="ml-1 flex items-center gap-1 rounded-full bg-white/10 px-3 py-1 transition hover:bg-white/20 hover:text-white">
-            Contact us <ArrowRight className="h-3.5 w-3.5" />
-          </a>
-        </div>
         <button className="lg:hidden" aria-label="Menu">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <line x1="3" y1="6" x2="21" y2="6" />
@@ -78,16 +68,6 @@ function LoginPage() {
           </svg>
         </button>
       </header>
-
-      {/* Top intro grid */}
-      <section className="relative z-10 mx-auto grid max-w-7xl grid-cols-1 gap-6 px-6 pt-4 lg:grid-cols-2">
-        <p className="max-w-md text-sm text-white/80 md:text-base">
-          We track every major competitive programming platform and quietly push reminders to your calendar — so you never miss another round.
-        </p>
-        <p className="text-sm text-white/80 md:text-base lg:text-right">
-          12,000+ developers stay contest-ready with us.
-        </p>
-      </section>
 
       {/* Hero */}
       <main className="relative z-10 mx-auto flex max-w-7xl flex-col items-center justify-center px-6 pt-20 pb-16 text-center md:pt-28">
@@ -115,9 +95,6 @@ function LoginPage() {
           <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
         </button>
 
-        <p className="mt-6 text-xs text-white/60">
-          No credit card. No spam. Just contest reminders.
-        </p>
       </main>
     </div>
   );
