@@ -69,7 +69,6 @@ function LoginPage() {
         </button>
       </header>
 
-
       {/* Hero */}
       <main className="relative z-10 mx-auto flex max-w-7xl flex-col items-center justify-center px-6 pt-20 pb-16 text-center md:pt-28">
         <p className="text-xs tracking-tight text-white/80 uppercase md:text-sm">
