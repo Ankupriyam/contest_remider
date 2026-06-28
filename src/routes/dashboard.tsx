@@ -105,56 +105,70 @@ function ContestCard({ c }: { c: (typeof CONTESTS)[number] }) {
   const platform = PLATFORMS.find((p) => p.id === c.platform)!;
   const countdown = useCountdown(c.startsInMs);
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-xl transition hover:border-white/20 hover:bg-white/[0.06]">
-      <div className="flex items-start justify-between gap-3">
+    <div className="liquid-glass group rounded-2xl p-6 transition-all duration-500 hover:-translate-y-1">
+      {/* ambient platform glow */}
+      <div
+        className="pointer-events-none absolute -top-24 -right-24 h-56 w-56 rounded-full opacity-30 blur-3xl transition-opacity duration-500 group-hover:opacity-50"
+        style={{ background: platform.color }}
+      />
+
+      <div className="relative flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           <div
-            className="flex h-11 w-11 items-center justify-center rounded-xl bg-white p-1.5"
-            style={{ boxShadow: `0 0 24px ${platform.color}40` }}
+            className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/95 p-2 ring-1 ring-white/20"
+            style={{ boxShadow: `0 8px 32px ${platform.color}55` }}
           >
             <img src={platform.logo} alt={platform.name} className="h-full w-full object-contain" />
           </div>
           <div>
-            <p className="text-xs text-white/60">{platform.name}</p>
-            <h3 className="text-sm font-medium text-white">{c.name}</h3>
+            <p className="text-[10px] uppercase tracking-[0.18em] text-white/40">
+              {platform.name}
+            </p>
+            <h3 className="mt-0.5 text-[15px] font-medium leading-tight text-white">
+              {c.name}
+            </h3>
           </div>
         </div>
         <span
-          className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-medium ${
+          className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-medium backdrop-blur ${
             c.status === "Scheduled"
-              ? "bg-blue-500/15 text-blue-300 ring-1 ring-blue-400/30"
-              : "bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-400/30"
+              ? "bg-white/10 text-white/80 ring-1 ring-white/15"
+              : "bg-emerald-400/15 text-emerald-200 ring-1 ring-emerald-300/30"
           }`}
         >
-          {c.status}
+          {c.status === "Scheduled" ? "Scheduled" : "Auto-add"}
         </span>
       </div>
 
-      <div className="mt-5 grid grid-cols-3 gap-2 text-xs text-white/70">
-        <div>
-          <p className="text-[10px] uppercase tracking-wider text-white/40">Date</p>
-          <p className="mt-1 text-white/90">{c.date}</p>
-        </div>
-        <div>
-          <p className="text-[10px] uppercase tracking-wider text-white/40">Start</p>
-          <p className="mt-1 text-white/90">{c.time}</p>
-        </div>
-        <div>
-          <p className="text-[10px] uppercase tracking-wider text-white/40">Duration</p>
-          <p className="mt-1 text-white/90">{c.durationMin} min</p>
-        </div>
+      <div className="relative mt-6 grid grid-cols-3 gap-3">
+        {[
+          { k: "Date", v: c.date },
+          { k: "Start", v: c.time },
+          { k: "Duration", v: `${c.durationMin} min` },
+        ].map((cell) => (
+          <div
+            key={cell.k}
+            className="rounded-xl bg-white/[0.03] px-3 py-2.5 ring-1 ring-inset ring-white/5"
+          >
+            <p className="text-[9px] uppercase tracking-[0.16em] text-white/35">{cell.k}</p>
+            <p className="mt-1 text-[13px] text-white/90">{cell.v}</p>
+          </div>
+        ))}
       </div>
 
-      <div className="mt-5 flex items-center justify-between border-t border-white/10 pt-4">
+      <div className="relative mt-5 flex items-center justify-between rounded-xl bg-gradient-to-r from-white/[0.06] to-white/[0.02] px-4 py-3 ring-1 ring-inset ring-white/10">
         <div className="flex items-center gap-2 text-xs text-white/60">
           <Clock className="h-3.5 w-3.5" />
           Starts in
         </div>
-        <span className="font-mono text-sm tabular-nums text-white">{countdown}</span>
+        <span className="font-mono text-[15px] tabular-nums tracking-tight text-white">
+          {countdown}
+        </span>
       </div>
     </div>
   );
 }
+
 
 function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
   return (
@@ -248,8 +262,9 @@ function Dashboard() {
               return (
                 <div
                   key={p.id}
-                  className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-xl transition hover:border-white/20"
+                  className="liquid-glass group rounded-2xl p-5 transition-all duration-500 hover:-translate-y-1"
                 >
+
                   <div
                     className="absolute -top-12 -right-12 h-32 w-32 rounded-full opacity-20 blur-3xl transition group-hover:opacity-40"
                     style={{ background: p.color }}
@@ -276,7 +291,7 @@ function Dashboard() {
         </section>
 
         {/* Reminder */}
-        <section className="mt-12 rounded-3xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-xl md:p-8">
+        <section className="liquid-glass mt-12 rounded-3xl p-6 md:p-8">
           <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
             <div className="max-w-md">
               <div className="flex items-center gap-2 text-white/60">
@@ -332,7 +347,7 @@ function Dashboard() {
         </section>
 
         {/* Settings */}
-        <section className="mt-12 rounded-3xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-xl md:p-8">
+        <section className="liquid-glass mt-12 rounded-3xl p-6 md:p-8">
           <h2 className="text-xl font-medium tracking-tight">Settings</h2>
           <div className="mt-5 divide-y divide-white/10">
             <div className="flex items-center justify-between gap-4 py-4">
