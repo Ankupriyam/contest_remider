@@ -262,8 +262,9 @@ function Dashboard() {
               return (
                 <div
                   key={p.id}
-                  className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-xl transition hover:border-white/20"
+                  className="liquid-glass group rounded-2xl p-5 transition-all duration-500 hover:-translate-y-1"
                 >
+
                   <div
                     className="absolute -top-12 -right-12 h-32 w-32 rounded-full opacity-20 blur-3xl transition group-hover:opacity-40"
                     style={{ background: p.color }}
