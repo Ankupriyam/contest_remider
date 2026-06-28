@@ -1,8 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, Calendar, LogOut, Clock, Bell, Check } from "lucide-react";
+import { format } from "date-fns";
 import { VideoBackground } from "@/components/VideoBackground";
 import { ShinyText } from "@/components/ShinyText";
+import { api } from "@/lib/api/client";
+import type { ContestResponse, Platform } from "@/types";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -16,25 +20,25 @@ export const Route = createFileRoute("/dashboard")({
 
 const PLATFORMS = [
   {
-    id: "leetcode",
+    id: "leetcode" as Platform,
     name: "LeetCode",
     logo: "https://leetcode.com/static/images/LeetCode_logo_rvs.png",
     color: "#FFA116",
   },
   {
-    id: "codeforces",
+    id: "codeforces" as Platform,
     name: "Codeforces",
     logo: "https://codeforces.org/s/0/apple-icon-180x180.png",
     color: "#1F8ACB",
   },
   {
-    id: "codechef",
+    id: "codechef" as Platform,
     name: "CodeChef",
     logo: "https://cdn.codechef.com/images/cc-logo.png",
     color: "#5B4638",
   },
   {
-    id: "atcoder",
+    id: "atcoder" as Platform,
     name: "AtCoder",
     logo: "https://img.atcoder.jp/assets/atcoder.png",
     color: "#222222",
@@ -50,63 +54,32 @@ const REMINDER_OPTIONS = [
   { label: "Custom", value: -1 },
 ];
 
-const CONTESTS = [
-  {
-    platform: "leetcode",
-    name: "LeetCode Weekly Contest 472",
-    date: "Sun, Jul 5, 2026",
-    time: "08:00 IST",
-    durationMin: 90,
-    startsInMs: 1000 * 60 * 60 * 26,
-    status: "Will be Added Automatically",
-  },
-  {
-    platform: "codeforces",
-    name: "Codeforces Round #1085 (Div. 2)",
-    date: "Fri, Jul 3, 2026",
-    time: "20:35 IST",
-    durationMin: 135,
-    startsInMs: 1000 * 60 * 60 * 12,
-    status: "Scheduled",
-  },
-  {
-    platform: "atcoder",
-    name: "AtCoder Beginner Contest 410",
-    date: "Sat, Jul 4, 2026",
-    time: "17:30 IST",
-    durationMin: 100,
-    startsInMs: 1000 * 60 * 60 * 20,
-    status: "Will be Added Automatically",
-  },
-  {
-    platform: "codechef",
-    name: "CodeChef Starters 196",
-    date: "Wed, Jul 1, 2026",
-    time: "20:00 IST",
-    durationMin: 120,
-    startsInMs: 1000 * 60 * 60 * 3,
-    status: "Scheduled",
-  },
-];
+function useCountdown(startTimeIso: string) {
+  const target = useMemo(() => new Date(startTimeIso).getTime(), [startTimeIso]);
+  const [remaining, setRemaining] = useState(() => Math.max(0, target - Date.now()));
 
-function useCountdown(startMs: number) {
-  const [remaining, setRemaining] = useState(startMs);
   useEffect(() => {
-    const t = setInterval(() => setRemaining((r) => Math.max(0, r - 1000)), 1000);
+    const tick = () => setRemaining(Math.max(0, target - Date.now()));
+    tick();
+    const t = setInterval(tick, 1000);
     return () => clearInterval(t);
-  }, []);
+  }, [target]);
+
   const h = Math.floor(remaining / 3_600_000);
   const m = Math.floor((remaining % 3_600_000) / 60_000);
   const s = Math.floor((remaining % 60_000) / 1000);
   return `${String(h).padStart(2, "0")}h ${String(m).padStart(2, "0")}m ${String(s).padStart(2, "0")}s`;
 }
 
-function ContestCard({ c }: { c: (typeof CONTESTS)[number] }) {
+function ContestCard({ c }: { c: ContestResponse }) {
   const platform = PLATFORMS.find((p) => p.id === c.platform)!;
-  const countdown = useCountdown(c.startsInMs);
+  const countdown = useCountdown(c.startTime);
+  const startDate = new Date(c.startTime);
+  const date = format(startDate, "EEE, MMM d, yyyy");
+  const time = format(startDate, "HH:mm");
+
   return (
     <div className="liquid-glass group rounded-2xl p-6 transition-all duration-500 hover:-translate-y-1">
-      {/* ambient platform glow */}
       <div
         className="pointer-events-none absolute -top-24 -right-24 h-56 w-56 rounded-full opacity-30 blur-3xl transition-opacity duration-500 group-hover:opacity-50"
         style={{ background: platform.color }}
@@ -121,12 +94,8 @@ function ContestCard({ c }: { c: (typeof CONTESTS)[number] }) {
             <img src={platform.logo} alt={platform.name} className="h-full w-full object-contain" />
           </div>
           <div>
-            <p className="text-[10px] uppercase tracking-[0.18em] text-white/40">
-              {platform.name}
-            </p>
-            <h3 className="mt-0.5 text-[15px] font-medium leading-tight text-white">
-              {c.name}
-            </h3>
+            <p className="text-[10px] uppercase tracking-[0.18em] text-white/40">{platform.name}</p>
+            <h3 className="mt-0.5 text-[15px] font-medium leading-tight text-white">{c.title}</h3>
           </div>
         </div>
         <span
@@ -142,8 +111,8 @@ function ContestCard({ c }: { c: (typeof CONTESTS)[number] }) {
 
       <div className="relative mt-6 grid grid-cols-3 gap-3">
         {[
-          { k: "Date", v: c.date },
-          { k: "Start", v: c.time },
+          { k: "Date", v: date },
+          { k: "Start", v: time },
           { k: "Duration", v: `${c.durationMin} min` },
         ].map((cell) => (
           <div
@@ -169,7 +138,6 @@ function ContestCard({ c }: { c: (typeof CONTESTS)[number] }) {
   );
 }
 
-
 function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
   return (
     <button
@@ -187,21 +155,82 @@ function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void 
 
 function Dashboard() {
   const navigate = useNavigate();
-  const [enabled, setEnabled] = useState<Record<string, boolean>>({
-    leetcode: true,
-    codeforces: true,
-    codechef: false,
-    atcoder: false,
-  });
-  const [reminder, setReminder] = useState(15);
+  const queryClient = useQueryClient();
 
+  const userQuery = useQuery({
+    queryKey: ["user"],
+    queryFn: api.getUser,
+  });
+
+  const contestsQuery = useQuery({
+    queryKey: ["contests"],
+    queryFn: api.getContests,
+    enabled: Boolean(userQuery.data),
+  });
+
+  const preferencesMutation = useMutation({
+    mutationFn: api.updatePreferences,
+    onSuccess: (user) => {
+      queryClient.setQueryData(["user"], user);
+      queryClient.invalidateQueries({ queryKey: ["contests"] });
+    },
+  });
+
+  const signOutMutation = useMutation({
+    mutationFn: api.signOut,
+    onSuccess: () => navigate({ to: "/" }),
+  });
+
+  const user = userQuery.data;
+  const contests = contestsQuery.data?.contests ?? [];
+
+  const enabled = useMemo(() => {
+    const selected = new Set(user?.selectedPlatforms ?? []);
+    return Object.fromEntries(PLATFORMS.map((p) => [p.id, selected.has(p.id)])) as Record<
+      string,
+      boolean
+    >;
+  }, [user?.selectedPlatforms]);
+
+  const reminder = user?.reminderMinutes ?? 15;
   const anyEnabled = Object.values(enabled).some(Boolean);
+
+  const savePlatforms = (nextEnabled: Record<string, boolean>) => {
+    const selectedPlatforms = PLATFORMS.filter((p) => nextEnabled[p.id]).map((p) => p.id);
+    preferencesMutation.mutate({ selectedPlatforms });
+  };
+
+  const saveReminder = (minutes: number) => {
+    if (minutes < 0) return;
+    preferencesMutation.mutate({ reminderMinutes: minutes });
+  };
+
+  if (userQuery.isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-black text-white">
+        Loading dashboard...
+      </div>
+    );
+  }
+
+  if (userQuery.isError || !user) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-black text-white">
+        <p>Unable to load your dashboard.</p>
+        <button
+          onClick={() => navigate({ to: "/" })}
+          className="rounded-full bg-white px-4 py-2 text-sm text-black"
+        >
+          Back to login
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen bg-black text-white" style={{ fontFamily: "Inter, sans-serif" }}>
       <VideoBackground />
 
-      {/* Nav */}
       <header className="relative z-10 mx-auto flex max-w-7xl items-center justify-between px-6 py-6">
         <div className="flex items-center gap-2.5">
           <div className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-white">
@@ -213,17 +242,17 @@ function Dashboard() {
         <div className="flex items-center gap-3">
           <div className="hidden items-center gap-3 rounded-full border border-gray-700 bg-black/30 px-2 py-1.5 pr-4 backdrop-blur sm:flex">
             <img
-              src="https://i.pravatar.cc/64?img=12"
+              src={user.image ?? "https://i.pravatar.cc/64?img=12"}
               alt="profile"
               className="h-7 w-7 rounded-full"
             />
             <div className="text-xs leading-tight">
-              <p className="font-medium text-white">Aarav Sharma</p>
-              <p className="text-white/60">aarav@gmail.com</p>
+              <p className="font-medium text-white">{user.name}</p>
+              <p className="text-white/60">{user.email}</p>
             </div>
           </div>
           <button
-            onClick={() => navigate({ to: "/" })}
+            onClick={() => signOutMutation.mutate()}
             className="flex items-center gap-1.5 rounded-full border border-white/15 px-3 py-1.5 text-xs text-white/80 transition hover:bg-white/10 hover:text-white"
           >
             <LogOut className="h-3.5 w-3.5" /> Logout
@@ -232,7 +261,6 @@ function Dashboard() {
       </header>
 
       <main className="relative z-10 mx-auto max-w-7xl px-6 pb-20">
-        {/* Hero */}
         <section className="pt-20 pb-20 text-center">
           <p className="text-xs tracking-tight text-white/80 uppercase md:text-sm">
             Your dashboard · synced with Google Calendar
@@ -246,7 +274,6 @@ function Dashboard() {
           </h1>
         </section>
 
-        {/* Platforms */}
         <section>
           <div className="mb-4 flex items-end justify-between">
             <div>
@@ -264,7 +291,6 @@ function Dashboard() {
                   key={p.id}
                   className="liquid-glass group rounded-2xl p-5 transition-all duration-500 hover:-translate-y-1"
                 >
-
                   <div
                     className="absolute -top-12 -right-12 h-32 w-32 rounded-full opacity-20 blur-3xl transition group-hover:opacity-40"
                     style={{ background: p.color }}
@@ -276,7 +302,10 @@ function Dashboard() {
                     >
                       <img src={p.logo} alt={p.name} className="h-full w-full object-contain" />
                     </div>
-                    <Toggle on={on} onChange={(v) => setEnabled({ ...enabled, [p.id]: v })} />
+                    <Toggle
+                      on={on}
+                      onChange={(v) => savePlatforms({ ...enabled, [p.id]: v })}
+                    />
                   </div>
                   <h3 className="relative mt-4 text-lg font-medium">{p.name}</h3>
                   <p className="relative mt-2 min-h-[48px] text-xs leading-relaxed text-white/60">
@@ -290,7 +319,6 @@ function Dashboard() {
           </div>
         </section>
 
-        {/* Reminder */}
         <section className="liquid-glass mt-12 rounded-3xl p-6 md:p-8">
           <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
             <div className="max-w-md">
@@ -311,7 +339,7 @@ function Dashboard() {
                 return (
                   <button
                     key={o.value}
-                    onClick={() => setReminder(o.value)}
+                    onClick={() => saveReminder(o.value)}
                     className={`rounded-full border px-4 py-2 text-xs transition ${
                       active
                         ? "border-white bg-white text-black"
@@ -326,7 +354,6 @@ function Dashboard() {
           </div>
         </section>
 
-        {/* Upcoming Contests */}
         <section className="mt-12">
           <div className="mb-4 flex items-end justify-between">
             <div>
@@ -337,16 +364,23 @@ function Dashboard() {
                   : "Enable a platform above to see your contests."}
               </p>
             </div>
-            <span className="hidden text-xs text-white/50 sm:block">{CONTESTS.length} this week</span>
+            <span className="hidden text-xs text-white/50 sm:block">{contests.length} upcoming</span>
           </div>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {CONTESTS.map((c) => (
-              <ContestCard key={c.name} c={c} />
-            ))}
-          </div>
+          {contestsQuery.isLoading ? (
+            <p className="text-sm text-white/60">Loading contests...</p>
+          ) : contestsQuery.isError ? (
+            <p className="text-sm text-red-300">Failed to load contests. Please try again later.</p>
+          ) : contests.length === 0 ? (
+            <p className="text-sm text-white/60">No upcoming contests found for your platforms.</p>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              {contests.map((c) => (
+                <ContestCard key={c.contestId} c={c} />
+              ))}
+            </div>
+          )}
         </section>
 
-        {/* Settings */}
         <section className="liquid-glass mt-12 rounded-3xl p-6 md:p-8">
           <h2 className="text-xl font-medium tracking-tight">Settings</h2>
           <div className="mt-5 divide-y divide-white/10">
@@ -357,11 +391,16 @@ function Dashboard() {
                 </div>
                 <div>
                   <p className="text-sm font-medium">Google Calendar</p>
-                  <p className="text-xs text-white/60">Connected as aarav@gmail.com</p>
+                  <p className="text-xs text-white/60">
+                    {user.calendarConnected
+                      ? `Connected as ${user.email}`
+                      : "Not connected"}
+                  </p>
                 </div>
               </div>
               <button className="flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-1.5 text-xs text-emerald-300 ring-1 ring-emerald-400/30">
-                <Check className="h-3.5 w-3.5" /> Connected
+                <Check className="h-3.5 w-3.5" />{" "}
+                {user.calendarConnected ? "Connected" : "Disconnected"}
               </button>
             </div>
             <div className="flex items-center justify-between gap-4 py-4">
@@ -375,10 +414,11 @@ function Dashboard() {
                 </div>
               </div>
               <button
-                onClick={() => navigate({ to: "/" })}
+                onClick={() => signOutMutation.mutate()}
                 className="group flex items-center gap-1.5 rounded-full bg-white px-4 py-2 text-xs font-medium text-black transition hover:bg-gray-100"
               >
-                Sign out <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                Sign out{" "}
+                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
               </button>
             </div>
           </div>

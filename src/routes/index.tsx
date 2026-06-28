@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { ShinyText } from "@/components/ShinyText";
 import { VideoBackground } from "@/components/VideoBackground";
@@ -46,13 +46,13 @@ function GoogleIcon() {
 }
 
 function LoginPage() {
-  const navigate = useNavigate();
+  const params = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
+  const error = params.get("error");
 
   return (
     <div className="relative min-h-screen bg-black text-white" style={{ fontFamily: "Inter, sans-serif" }}>
       <VideoBackground />
 
-      {/* Nav */}
       <header className="relative z-10 mx-auto flex max-w-7xl items-center justify-between px-6 py-6">
         <div className="flex items-center gap-2.5">
           <div className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-white">
@@ -69,7 +69,6 @@ function LoginPage() {
         </button>
       </header>
 
-      {/* Hero */}
       <main className="relative z-10 mx-auto flex max-w-7xl flex-col items-center justify-center px-6 pt-20 pb-16 text-center md:pt-28">
         <p className="text-xs tracking-tight text-white/80 uppercase md:text-sm">
           Sync Once · Stay Ready Forever
@@ -86,15 +85,20 @@ function LoginPage() {
           One click connects your Google Calendar to LeetCode, Codeforces, CodeChef, and AtCoder.
         </p>
 
-        <button
-          onClick={() => navigate({ to: "/dashboard" })}
+        {error ? (
+          <p className="mt-6 text-sm text-red-300">
+            Sign in failed. Please try again and grant Google Calendar permissions.
+          </p>
+        ) : null}
+
+        <a
+          href="/api/auth/signin/google"
           className="group mt-10 inline-flex items-center gap-3 rounded-full bg-white px-6 py-3 text-sm font-medium text-black transition hover:bg-gray-100 md:px-8 md:py-4"
         >
           <GoogleIcon />
           Continue with Google
           <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-        </button>
-
+        </a>
       </main>
     </div>
   );

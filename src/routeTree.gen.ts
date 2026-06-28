@@ -11,6 +11,15 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiUserRouteImport } from './routes/api/user'
+import { Route as ApiHealthRouteImport } from './routes/api/health'
+import { Route as ApiContestsRouteImport } from './routes/api/contests'
+import { Route as ApiUserPreferencesRouteImport } from './routes/api/user/preferences'
+import { Route as ApiCalendarSyncRouteImport } from './routes/api/calendar/sync'
+import { Route as ApiAuthSignoutRouteImport } from './routes/api/auth/signout'
+import { Route as ApiAuthSessionRouteImport } from './routes/api/auth/session'
+import { Route as ApiAuthSigninGoogleRouteImport } from './routes/api/auth/signin/google'
+import { Route as ApiAuthCallbackGoogleRouteImport } from './routes/api/auth/callback/google'
 
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
@@ -22,31 +31,145 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiUserRoute = ApiUserRouteImport.update({
+  id: '/api/user',
+  path: '/api/user',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiHealthRoute = ApiHealthRouteImport.update({
+  id: '/api/health',
+  path: '/api/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiContestsRoute = ApiContestsRouteImport.update({
+  id: '/api/contests',
+  path: '/api/contests',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiUserPreferencesRoute = ApiUserPreferencesRouteImport.update({
+  id: '/preferences',
+  path: '/preferences',
+  getParentRoute: () => ApiUserRoute,
+} as any)
+const ApiCalendarSyncRoute = ApiCalendarSyncRouteImport.update({
+  id: '/api/calendar/sync',
+  path: '/api/calendar/sync',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthSignoutRoute = ApiAuthSignoutRouteImport.update({
+  id: '/api/auth/signout',
+  path: '/api/auth/signout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthSessionRoute = ApiAuthSessionRouteImport.update({
+  id: '/api/auth/session',
+  path: '/api/auth/session',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthSigninGoogleRoute = ApiAuthSigninGoogleRouteImport.update({
+  id: '/api/auth/signin/google',
+  path: '/api/auth/signin/google',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthCallbackGoogleRoute = ApiAuthCallbackGoogleRouteImport.update({
+  id: '/api/auth/callback/google',
+  path: '/api/auth/callback/google',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/api/contests': typeof ApiContestsRoute
+  '/api/health': typeof ApiHealthRoute
+  '/api/user': typeof ApiUserRouteWithChildren
+  '/api/auth/session': typeof ApiAuthSessionRoute
+  '/api/auth/signout': typeof ApiAuthSignoutRoute
+  '/api/calendar/sync': typeof ApiCalendarSyncRoute
+  '/api/user/preferences': typeof ApiUserPreferencesRoute
+  '/api/auth/callback/google': typeof ApiAuthCallbackGoogleRoute
+  '/api/auth/signin/google': typeof ApiAuthSigninGoogleRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/api/contests': typeof ApiContestsRoute
+  '/api/health': typeof ApiHealthRoute
+  '/api/user': typeof ApiUserRouteWithChildren
+  '/api/auth/session': typeof ApiAuthSessionRoute
+  '/api/auth/signout': typeof ApiAuthSignoutRoute
+  '/api/calendar/sync': typeof ApiCalendarSyncRoute
+  '/api/user/preferences': typeof ApiUserPreferencesRoute
+  '/api/auth/callback/google': typeof ApiAuthCallbackGoogleRoute
+  '/api/auth/signin/google': typeof ApiAuthSigninGoogleRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/api/contests': typeof ApiContestsRoute
+  '/api/health': typeof ApiHealthRoute
+  '/api/user': typeof ApiUserRouteWithChildren
+  '/api/auth/session': typeof ApiAuthSessionRoute
+  '/api/auth/signout': typeof ApiAuthSignoutRoute
+  '/api/calendar/sync': typeof ApiCalendarSyncRoute
+  '/api/user/preferences': typeof ApiUserPreferencesRoute
+  '/api/auth/callback/google': typeof ApiAuthCallbackGoogleRoute
+  '/api/auth/signin/google': typeof ApiAuthSigninGoogleRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/api/contests'
+    | '/api/health'
+    | '/api/user'
+    | '/api/auth/session'
+    | '/api/auth/signout'
+    | '/api/calendar/sync'
+    | '/api/user/preferences'
+    | '/api/auth/callback/google'
+    | '/api/auth/signin/google'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard'
-  id: '__root__' | '/' | '/dashboard'
+  to:
+    | '/'
+    | '/dashboard'
+    | '/api/contests'
+    | '/api/health'
+    | '/api/user'
+    | '/api/auth/session'
+    | '/api/auth/signout'
+    | '/api/calendar/sync'
+    | '/api/user/preferences'
+    | '/api/auth/callback/google'
+    | '/api/auth/signin/google'
+  id:
+    | '__root__'
+    | '/'
+    | '/dashboard'
+    | '/api/contests'
+    | '/api/health'
+    | '/api/user'
+    | '/api/auth/session'
+    | '/api/auth/signout'
+    | '/api/calendar/sync'
+    | '/api/user/preferences'
+    | '/api/auth/callback/google'
+    | '/api/auth/signin/google'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRoute
+  ApiContestsRoute: typeof ApiContestsRoute
+  ApiHealthRoute: typeof ApiHealthRoute
+  ApiUserRoute: typeof ApiUserRouteWithChildren
+  ApiAuthSessionRoute: typeof ApiAuthSessionRoute
+  ApiAuthSignoutRoute: typeof ApiAuthSignoutRoute
+  ApiCalendarSyncRoute: typeof ApiCalendarSyncRoute
+  ApiAuthCallbackGoogleRoute: typeof ApiAuthCallbackGoogleRoute
+  ApiAuthSigninGoogleRoute: typeof ApiAuthSigninGoogleRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,13 +188,105 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/user': {
+      id: '/api/user'
+      path: '/api/user'
+      fullPath: '/api/user'
+      preLoaderRoute: typeof ApiUserRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/health': {
+      id: '/api/health'
+      path: '/api/health'
+      fullPath: '/api/health'
+      preLoaderRoute: typeof ApiHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/contests': {
+      id: '/api/contests'
+      path: '/api/contests'
+      fullPath: '/api/contests'
+      preLoaderRoute: typeof ApiContestsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/user/preferences': {
+      id: '/api/user/preferences'
+      path: '/preferences'
+      fullPath: '/api/user/preferences'
+      preLoaderRoute: typeof ApiUserPreferencesRouteImport
+      parentRoute: typeof ApiUserRoute
+    }
+    '/api/calendar/sync': {
+      id: '/api/calendar/sync'
+      path: '/api/calendar/sync'
+      fullPath: '/api/calendar/sync'
+      preLoaderRoute: typeof ApiCalendarSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/signout': {
+      id: '/api/auth/signout'
+      path: '/api/auth/signout'
+      fullPath: '/api/auth/signout'
+      preLoaderRoute: typeof ApiAuthSignoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/session': {
+      id: '/api/auth/session'
+      path: '/api/auth/session'
+      fullPath: '/api/auth/session'
+      preLoaderRoute: typeof ApiAuthSessionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/signin/google': {
+      id: '/api/auth/signin/google'
+      path: '/api/auth/signin/google'
+      fullPath: '/api/auth/signin/google'
+      preLoaderRoute: typeof ApiAuthSigninGoogleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/callback/google': {
+      id: '/api/auth/callback/google'
+      path: '/api/auth/callback/google'
+      fullPath: '/api/auth/callback/google'
+      preLoaderRoute: typeof ApiAuthCallbackGoogleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
+
+interface ApiUserRouteChildren {
+  ApiUserPreferencesRoute: typeof ApiUserPreferencesRoute
+}
+
+const ApiUserRouteChildren: ApiUserRouteChildren = {
+  ApiUserPreferencesRoute: ApiUserPreferencesRoute,
+}
+
+const ApiUserRouteWithChildren =
+  ApiUserRoute._addFileChildren(ApiUserRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRoute,
+  ApiContestsRoute: ApiContestsRoute,
+  ApiHealthRoute: ApiHealthRoute,
+  ApiUserRoute: ApiUserRouteWithChildren,
+  ApiAuthSessionRoute: ApiAuthSessionRoute,
+  ApiAuthSignoutRoute: ApiAuthSignoutRoute,
+  ApiCalendarSyncRoute: ApiCalendarSyncRoute,
+  ApiAuthCallbackGoogleRoute: ApiAuthCallbackGoogleRoute,
+  ApiAuthSigninGoogleRoute: ApiAuthSigninGoogleRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
