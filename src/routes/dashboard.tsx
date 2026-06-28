@@ -291,7 +291,7 @@ function Dashboard() {
         </section>
 
         {/* Reminder */}
-        <section className="mt-12 rounded-3xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-xl md:p-8">
+        <section className="liquid-glass mt-12 rounded-3xl p-6 md:p-8">
           <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
             <div className="max-w-md">
               <div className="flex items-center gap-2 text-white/60">
@@ -347,7 +347,7 @@ function Dashboard() {
         </section>
 
         {/* Settings */}
-        <section className="mt-12 rounded-3xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-xl md:p-8">
+        <section className="liquid-glass mt-12 rounded-3xl p-6 md:p-8">
           <h2 className="text-xl font-medium tracking-tight">Settings</h2>
           <div className="mt-5 divide-y divide-white/10">
             <div className="flex items-center justify-between gap-4 py-4">
