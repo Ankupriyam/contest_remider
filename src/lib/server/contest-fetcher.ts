@@ -163,59 +163,93 @@ async function fetchFromLeetCode(): Promise<FetchedContest[]> {
     .filter((c) => c.startTime.getTime() > now);
 }
 
+function parseAtCoderDateTime(value: string): Date {
+  const normalized = value.trim().replace(" ", "T").replace(/([+-]\d{2})(\d{2})$/, "$1:$2");
+  return new Date(normalized);
+}
+
 async function fetchFromAtCoder(): Promise<FetchedContest[]> {
-  const response = await fetch("https://kenkoooo.com/atcoder/resources/contests.json");
+  const response = await fetch("https://atcoder.jp/contests/", {
+    headers: { "User-Agent": "ContestReminder/1.0 (+https://github.com/contest-reminder)" },
+  });
   if (!response.ok) {
-    throw new Error(`AtCoder contests feed failed with status ${response.status}`);
+    throw new Error(`AtCoder contests page failed with status ${response.status}`);
   }
 
-  const contests = (await response.json()) as Array<[string, string, string, string]>;
-  const now = Date.now();
+  const html = await response.text();
+  const sectionStart = ["Upcoming Contests", "Contest scheduled", "開催予定"]
+    .map((marker) => html.indexOf(marker))
+    .find((index) => index >= 0);
+  const pastStart = html.indexOf("Past Contests");
+  const section =
+    sectionStart !== undefined && sectionStart >= 0
+      ? html.slice(sectionStart, pastStart > sectionStart ? pastStart : sectionStart + 20_000)
+      : html;
 
-  return contests
-    .map((entry) => {
-      const [id, startIso, endIso, title] = entry;
-      const startTime = new Date(startIso);
-      const endTime = new Date(endIso);
-      return {
-        contestId: `atcoder-${id}`,
-        platform: "atcoder" as Platform,
-        title,
-        startTime,
-        endTime,
-        url: `https://atcoder.jp/contests/${id}`,
-      };
-    })
-    .filter((c) => c.startTime.getTime() > now);
+  const rowRe =
+    /<time class='fixtime fixtime-full'>([^<]+)<\/time>[\s\S]*?href="\/contests\/([^"]+)"[^>]*>([^<]+)<\/a>[\s\S]*?<td class="text-center">(\d+):(\d+)<\/td>/g;
+
+  const now = Date.now();
+  const contests: FetchedContest[] = [];
+  let match: RegExpExecArray | null;
+
+  while ((match = rowRe.exec(section)) !== null) {
+    const [, startRaw, id, title, hoursRaw, minutesRaw] = match;
+    const startTime = parseAtCoderDateTime(startRaw);
+    const durationMs = (parseInt(hoursRaw, 10) * 60 + parseInt(minutesRaw, 10)) * 60_000;
+    const endTime = new Date(startTime.getTime() + durationMs);
+
+    if (startTime.getTime() <= now) continue;
+
+    contests.push({
+      contestId: `atcoder-${id}`,
+      platform: "atcoder",
+      title,
+      startTime,
+      endTime,
+      url: `https://atcoder.jp/contests/${id}`,
+    });
+  }
+
+  if (contests.length === 0) {
+    logger.warn({ event: "atcoder_fetch_empty", message: "No upcoming contests parsed from AtCoder page" });
+  }
+
+  return contests;
 }
 
 async function fetchFromCodeChef(): Promise<FetchedContest[]> {
-  const response = await fetch("https://www.codechef.com/api/list/contests/all?sort_by=START&sorting_order=asc&offset=0&mode=all");
+  const response = await fetch(
+    "https://www.codechef.com/api/list/contests/all?sort_by=START&sorting_order=asc&offset=0&mode=all",
+    {
+      headers: { "User-Agent": "ContestReminder/1.0 (+https://github.com/contest-reminder)" },
+    },
+  );
   if (!response.ok) {
     throw new Error(`CodeChef API failed with status ${response.status}`);
   }
 
   const data = (await response.json()) as {
     future_contests?: Array<{
-      code: string;
-      name: string;
-      start_date: string;
-      end_date: string;
+      contest_code: string;
+      contest_name: string;
+      contest_start_date_iso: string;
+      contest_end_date_iso: string;
     }>;
   };
 
   const now = Date.now();
   return (data.future_contests ?? [])
     .map((c) => {
-      const startTime = new Date(c.start_date.replace(" ", "T") + "Z");
-      const endTime = new Date(c.end_date.replace(" ", "T") + "Z");
+      const startTime = new Date(c.contest_start_date_iso);
+      const endTime = new Date(c.contest_end_date_iso);
       return {
-        contestId: `codechef-${c.code}`,
+        contestId: `codechef-${c.contest_code}`,
         platform: "codechef" as Platform,
-        title: c.name,
+        title: c.contest_name,
         startTime,
         endTime,
-        url: `https://www.codechef.com/${c.code}`,
+        url: `https://www.codechef.com/${c.contest_code}`,
       };
     })
     .filter((c) => c.startTime.getTime() > now);
