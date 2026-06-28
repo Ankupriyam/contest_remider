@@ -261,12 +261,12 @@ function Dashboard() {
       </header>
 
       <main className="relative z-10 mx-auto max-w-7xl px-6 pb-20">
-        <section className="pt-20 pb-20 text-center">
+        <section className="pt-20 pb-20 text-center md:pt-28">
           <p className="text-xs tracking-tight text-white/80 uppercase md:text-sm">
             Your dashboard · synced with Google Calendar
           </p>
           <h1
-            className="font-medium tracking-tighter text-5xl sm:text-6xl md:text-7xl lg:text-8xl"
+            className="mt-6 font-medium tracking-tighter text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl"
             style={{ lineHeight: 0.85 }}
           >
             <span className="block text-white">Never miss</span>
