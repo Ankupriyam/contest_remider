@@ -233,12 +233,12 @@ function Dashboard() {
 
       <main className="relative z-10 mx-auto max-w-7xl px-6 pb-20">
         {/* Hero */}
-        <section className="pt-6 pb-12 text-center">
+        <section className="pt-20 pb-20 text-center">
           <p className="text-xs tracking-tight text-white/80 uppercase md:text-sm">
             Your dashboard · synced with Google Calendar
           </p>
           <h1
-            className="mt-5 font-medium tracking-tighter text-5xl sm:text-6xl md:text-7xl lg:text-8xl"
+            className="font-medium tracking-tighter text-5xl sm:text-6xl md:text-7xl lg:text-8xl"
             style={{ lineHeight: 0.85 }}
           >
             <span className="block text-white">Never miss</span>
