@@ -241,8 +241,8 @@ function Dashboard() {
             className="mt-5 font-medium tracking-tighter text-5xl sm:text-6xl md:text-7xl lg:text-8xl"
             style={{ lineHeight: 0.85 }}
           >
-            <span className="block text-white">Stay</span>
-            <ShinyText text="contest-ready." className="block" />
+            <span className="block text-white">Never miss</span>
+            <ShinyText text="a contest." className="block" />
           </h1>
         </section>
 
