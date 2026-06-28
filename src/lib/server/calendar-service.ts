@@ -87,3 +87,25 @@ export async function updateCalendarEvent(
     googleEventId,
   });
 }
+
+export async function deleteCalendarEvent(user: UserDocument, googleEventId: string) {
+  const calendar = await getAuthenticatedCalendarClient(user);
+
+  try {
+    await calendar.events.delete({
+      calendarId: "primary",
+      eventId: googleEventId,
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "";
+    if (!message.includes("404") && !message.includes("Not Found")) {
+      throw error;
+    }
+  }
+
+  logger.info({
+    event: "calendar_event_deleted",
+    userId: user._id.toString(),
+    googleEventId,
+  });
+}

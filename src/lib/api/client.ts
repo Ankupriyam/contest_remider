@@ -1,4 +1,9 @@
-import type { ContestResponse, UserPreferencesPayload, UserProfile } from "@/types";
+import type {
+  ContestResponse,
+  PreferencesUpdateResponse,
+  UserPreferencesPayload,
+  UserProfile,
+} from "@/types";
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(path, {
@@ -10,12 +15,13 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     },
   });
 
-  if (!response.ok) {
-    const body = (await response.json().catch(() => ({}))) as { error?: string };
+  const body = (await response.json().catch(() => ({}))) as T & { error?: string };
+
+  if (!response.ok && response.status !== 207) {
     throw new Error(body.error ?? `Request failed (${response.status})`);
   }
 
-  return response.json() as Promise<T>;
+  return body as T;
 }
 
 export const api = {
@@ -24,7 +30,7 @@ export const api = {
   signOut: () => request<{ success: boolean }>("/api/auth/signout", { method: "POST" }),
   getUser: () => request<UserProfile>("/api/user"),
   updatePreferences: (payload: UserPreferencesPayload) =>
-    request<UserProfile>("/api/user/preferences", {
+    request<PreferencesUpdateResponse>("/api/user/preferences", {
       method: "PUT",
       body: JSON.stringify(payload),
     }),

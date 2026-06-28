@@ -26,3 +26,15 @@ export interface UserPreferencesPayload {
   selectedPlatforms?: Platform[];
   reminderMinutes?: number;
 }
+
+export interface SyncResult {
+  synced: number;
+  removed: number;
+  updated: number;
+  failed: number;
+}
+
+export interface PreferencesUpdateResponse {
+  user: UserProfile;
+  sync: SyncResult;
+}

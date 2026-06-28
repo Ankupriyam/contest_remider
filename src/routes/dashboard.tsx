@@ -138,11 +138,22 @@ function ContestCard({ c }: { c: ContestResponse }) {
   );
 }
 
-function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
+function Toggle({
+  on,
+  onChange,
+  disabled,
+}: {
+  on: boolean;
+  onChange: (v: boolean) => void;
+  disabled?: boolean;
+}) {
   return (
     <button
       onClick={() => onChange(!on)}
-      className={`relative h-6 w-11 shrink-0 rounded-full transition ${on ? "bg-white" : "bg-white/15"}`}
+      disabled={disabled}
+      className={`relative h-6 w-11 shrink-0 rounded-full transition ${
+        disabled ? "cursor-wait opacity-60" : ""
+      } ${on ? "bg-white" : "bg-white/15"}`}
     >
       <span
         className={`absolute top-0.5 h-5 w-5 rounded-full bg-black transition-all ${
@@ -170,8 +181,8 @@ function Dashboard() {
 
   const preferencesMutation = useMutation({
     mutationFn: api.updatePreferences,
-    onSuccess: (user) => {
-      queryClient.setQueryData(["user"], user);
+    onSuccess: (data) => {
+      queryClient.setQueryData(["user"], data.user);
       queryClient.invalidateQueries({ queryKey: ["contests"] });
     },
   });
@@ -184,7 +195,10 @@ function Dashboard() {
   const user = userQuery.data;
   const contests = contestsQuery.data?.contests ?? [];
 
-  const enabled = useMemo(() => {
+  const [optimisticEnabled, setOptimisticEnabled] = useState<Record<string, boolean> | null>(null);
+  const [syncingPlatform, setSyncingPlatform] = useState<string | null>(null);
+
+  const serverEnabled = useMemo(() => {
     const selected = new Set(user?.selectedPlatforms ?? []);
     return Object.fromEntries(PLATFORMS.map((p) => [p.id, selected.has(p.id)])) as Record<
       string,
@@ -192,12 +206,25 @@ function Dashboard() {
     >;
   }, [user?.selectedPlatforms]);
 
+  const enabled = optimisticEnabled ?? serverEnabled;
   const reminder = user?.reminderMinutes ?? 15;
   const anyEnabled = Object.values(enabled).some(Boolean);
 
-  const savePlatforms = (nextEnabled: Record<string, boolean>) => {
+  const togglePlatform = (platformId: string, value: boolean) => {
+    const nextEnabled = { ...enabled, [platformId]: value };
+    setOptimisticEnabled(nextEnabled);
+    setSyncingPlatform(platformId);
+
     const selectedPlatforms = PLATFORMS.filter((p) => nextEnabled[p.id]).map((p) => p.id);
-    preferencesMutation.mutate({ selectedPlatforms });
+    preferencesMutation.mutate(
+      { selectedPlatforms },
+      {
+        onSettled: () => {
+          setSyncingPlatform(null);
+          setOptimisticEnabled(null);
+        },
+      },
+    );
   };
 
   const saveReminder = (minutes: number) => {
@@ -304,14 +331,19 @@ function Dashboard() {
                     </div>
                     <Toggle
                       on={on}
-                      onChange={(v) => savePlatforms({ ...enabled, [p.id]: v })}
+                      onChange={(v) => togglePlatform(p.id, v)}
+                      disabled={syncingPlatform === p.id}
                     />
                   </div>
                   <h3 className="relative mt-4 text-lg font-medium">{p.name}</h3>
                   <p className="relative mt-2 min-h-[48px] text-xs leading-relaxed text-white/60">
-                    {on
-                      ? "All future contests will be added to your Google Calendar with your reminder time."
-                      : "Toggle on to start receiving calendar reminders."}
+                    {syncingPlatform === p.id
+                      ? on
+                        ? "Adding future contests to your Google Calendar..."
+                        : "Removing calendar reminders for this platform..."
+                      : on
+                        ? "All future contests will be added to your Google Calendar with your reminder time."
+                        : "Toggle on to start receiving calendar reminders."}
                   </p>
                 </div>
               );

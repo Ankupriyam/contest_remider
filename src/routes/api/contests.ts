@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { withApiHandler } from "@/lib/server/api-handler";
+import { ensureContestsFresh } from "@/lib/server/contest-fetcher";
 import { CalendarEvent } from "@/models/CalendarEvent";
 import { Contest } from "@/models/Contest";
 import type { ContestResponse } from "@/types";
@@ -15,6 +16,8 @@ export const Route = createFileRoute("/api/contests")({
             if (!user) {
               return Response.json({ error: "Unauthorized" }, { status: 401 });
             }
+
+            await ensureContestsFresh(true);
 
             const now = new Date();
             const platforms =

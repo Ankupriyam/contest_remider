@@ -259,6 +259,65 @@ export async function fetchAllContests(): Promise<FetchedContest[]> {
   return [...contests.values()];
 }
 
+export async function syncContestsForPlatforms(platforms: Platform[]) {
+  if (platforms.length === 0) return;
+
+  logger.info({ event: "contest_fetch_started", platforms });
+
+  const results = await Promise.allSettled(platforms.map((platform) => fetchPlatformContests(platform)));
+  const contests = new Map<string, FetchedContest>();
+
+  for (const result of results) {
+    if (result.status === "fulfilled") {
+      for (const contest of result.value) {
+        if (platforms.includes(contest.platform)) {
+          contests.set(contest.contestId, contest);
+        }
+      }
+    } else {
+      logger.warn({
+        event: "contest_fetch_partial_failure",
+        error: result.reason instanceof Error ? result.reason.message : "unknown",
+      });
+    }
+  }
+
+  let created = 0;
+  let updated = 0;
+
+  for (const contest of contests.values()) {
+    const existing = await Contest.findOne({ contestId: contest.contestId });
+    if (!existing) {
+      await Contest.create(contest);
+      created += 1;
+      continue;
+    }
+
+    const changed =
+      existing.title !== contest.title ||
+      existing.startTime.getTime() !== contest.startTime.getTime() ||
+      existing.endTime.getTime() !== contest.endTime.getTime() ||
+      existing.url !== contest.url;
+
+    if (changed) {
+      existing.title = contest.title;
+      existing.startTime = contest.startTime;
+      existing.endTime = contest.endTime;
+      existing.url = contest.url;
+      await existing.save();
+      updated += 1;
+    }
+  }
+
+  logger.info({
+    event: "contest_fetch_completed",
+    platforms,
+    fetched: contests.size,
+    created,
+    updated,
+  });
+}
+
 export async function syncContestsToDatabase() {
   logger.info({ event: "contest_fetch_started" });
   const contests = await fetchAllContests();
@@ -296,3 +355,18 @@ export async function syncContestsToDatabase() {
     updated,
   });
 }
+
+let lastContestSyncAt = 0;
+const CONTEST_SYNC_INTERVAL_MS = 5 * 60 * 1000;
+
+export async function ensureContestsFresh(force = false) {
+  const now = Date.now();
+  if (!force && now - lastContestSyncAt < CONTEST_SYNC_INTERVAL_MS) {
+    const upcoming = await Contest.countDocuments({ startTime: { $gt: new Date() } });
+    if (upcoming > 0) return;
+  }
+
+  await syncContestsToDatabase();
+  lastContestSyncAt = now;
+}
+
