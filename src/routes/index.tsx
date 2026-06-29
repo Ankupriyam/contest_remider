@@ -84,7 +84,7 @@ function LoginPage() {
           </p>
 
           <div className="mt-8 rounded-2xl bg-white/5 border border-white/10 p-6 text-left">
-            <h2 className="text-lg font-semibold text-white mb-2">👉 Google Calendar Integration</h2>
+            <h2 className="text-lg font-semibold text-white mb-2">Google Calendar Integration</h2>
             <p className="text-white/90 font-medium mb-1">Add contests to Google Calendar</p>
             <p className="text-sm text-white/70">
               Users can sync contest reminders directly to Google Calendar. We automatically detect upcoming programming competitions and seamlessly schedule them in your connected calendar so you never miss a match.
