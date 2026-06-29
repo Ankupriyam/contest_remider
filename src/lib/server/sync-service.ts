@@ -85,6 +85,44 @@ async function removeCalendarEventsForPlatforms(
   return { removed, failed };
 }
 
+async function cleanupCalendarEvents(
+  user: UserDocument,
+): Promise<Pick<SyncResult, "removed" | "failed">> {
+  const now = new Date();
+  const calendarEvents = await CalendarEvent.find({ userId: user._id });
+  if (calendarEvents.length === 0) {
+    return { removed: 0, failed: 0 };
+  }
+
+  // Find future contests for the user's enabled platforms
+  const futureContests = await Contest.find({
+    platform: { $in: user.selectedPlatforms },
+    startTime: { $gt: now },
+  });
+  const futureContestIds = new Set(futureContests.map((c) => c.contestId));
+
+  // Any event that doesn't correspond to a future contest gets removed
+  const eventsToRemove = calendarEvents.filter((e) => !futureContestIds.has(e.contestId));
+
+  const results = await Promise.allSettled(
+    eventsToRemove.map(async (entry) => {
+      try {
+        await deleteCalendarEvent(user, entry.googleEventId);
+      } catch (err) {
+        // Ignore errors if already deleted externally
+      }
+      await CalendarEvent.deleteOne({ _id: entry._id });
+      return "removed" as const;
+    }),
+  );
+
+  const removed = results.filter((r) => r.status === "fulfilled").length;
+  const failed = results.filter((r) => r.status === "rejected").length;
+
+  return { removed, failed };
+}
+
+
 async function updateCalendarEventsForPlatforms(
   user: UserDocument,
   platforms: Platform[],
@@ -182,12 +220,13 @@ export async function syncUserCalendar(userId: string, options?: { fetchContests
 
   await syncContestsForPlatforms(user.selectedPlatforms);
   const created = await createCalendarEventsForPlatforms(user, user.selectedPlatforms);
+  const cleaned = await cleanupCalendarEvents(user);
 
   return {
     synced: created.synced,
     updated: 0,
-    failed: created.failed,
-    removed: 0,
+    failed: created.failed + cleaned.failed,
+    removed: cleaned.removed,
   };
 }
 

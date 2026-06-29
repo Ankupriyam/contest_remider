@@ -65,9 +65,14 @@ function useCountdown(startTimeIso: string) {
     return () => clearInterval(t);
   }, [target]);
 
-  const h = Math.floor(remaining / 3_600_000);
+  const d = Math.floor(remaining / 86_400_000);
+  const h = Math.floor((remaining % 86_400_000) / 3_600_000);
   const m = Math.floor((remaining % 3_600_000) / 60_000);
   const s = Math.floor((remaining % 60_000) / 1000);
+
+  if (d > 0) {
+    return `${d}d ${String(h).padStart(2, "0")}h ${String(m).padStart(2, "0")}m`;
+  }
   return `${String(h).padStart(2, "0")}h ${String(m).padStart(2, "0")}m ${String(s).padStart(2, "0")}s`;
 }
 
@@ -260,9 +265,6 @@ function Dashboard() {
 
       <header className="relative z-10 mx-auto flex max-w-7xl items-center justify-between px-6 py-6">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-white">
-            <div className="h-2.5 w-2.5 rounded-full bg-white" />
-          </div>
           <span className="text-base font-medium tracking-tight">Contest Reminder</span>
         </div>
 

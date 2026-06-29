@@ -17,7 +17,7 @@ export const Route = createFileRoute("/api/contests")({
               return Response.json({ error: "Unauthorized" }, { status: 401 });
             }
 
-            await ensureContestsFresh(true);
+            await ensureContestsFresh();
 
             const now = new Date();
             const platforms =

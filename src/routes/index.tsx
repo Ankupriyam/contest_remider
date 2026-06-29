@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { ShinyText } from "@/components/ShinyText";
 import { VideoBackground } from "@/components/VideoBackground";
@@ -100,6 +100,13 @@ function LoginPage() {
           <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
         </a>
       </main>
+
+      <footer className="relative z-10 w-full border-t border-white/10 mt-auto py-6 text-center text-xs text-white/50">
+        <div className="flex justify-center gap-6">
+          <Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+          <Link to="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
+        </div>
+      </footer>
     </div>
   );
 }

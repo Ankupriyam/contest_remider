@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: contest-reminder
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production
+  - type: cron
+    name: contest-reminder-cron
+    env: node
+    plan: free
+    schedule: "*/15 * * * *"
+    command: curl -s $APP_URL/api/cron
