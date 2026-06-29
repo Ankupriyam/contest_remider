@@ -14,7 +14,7 @@ export const Route = createFileRoute("/api/auth/signin/google")({
         if (rateLimited) return rateLimited;
 
         const state = randomBytes(16).toString("hex");
-        const url = getGoogleAuthUrl(state);
+        const url = getGoogleAuthUrl(state, false);
 
         return new Response(null, {
           status: 302,

@@ -159,20 +159,20 @@ export async function handlePlatformChanges(
   previousPlatforms: Platform[],
   nextPlatforms: Platform[],
 ): Promise<SyncResult> {
-  const added = nextPlatforms.filter((p) => !previousPlatforms.includes(p));
-  const removed = previousPlatforms.filter((p) => !nextPlatforms.includes(p));
+  const platformsAdded = nextPlatforms.filter((p) => !previousPlatforms.includes(p));
+  const platformsRemoved = previousPlatforms.filter((p) => !nextPlatforms.includes(p));
 
   const result: SyncResult = { synced: 0, removed: 0, updated: 0, failed: 0 };
 
-  if (added.length > 0) {
-    await syncContestsForPlatforms(added);
-    const created = await createCalendarEventsForPlatforms(user, added);
+  if (platformsAdded.length > 0) {
+    await syncContestsForPlatforms(platformsAdded);
+    const created = await createCalendarEventsForPlatforms(user, platformsAdded);
     result.synced += created.synced;
     result.failed += created.failed;
   }
 
-  if (removed.length > 0) {
-    const removedEvents = await removeCalendarEventsForPlatforms(user, removed);
+  if (platformsRemoved.length > 0) {
+    const removedEvents = await removeCalendarEventsForPlatforms(user, platformsRemoved);
     result.removed += removedEvents.removed;
     result.failed += removedEvents.failed;
   }
@@ -180,8 +180,8 @@ export async function handlePlatformChanges(
   logger.info({
     event: "platform_change_sync_completed",
     userId: user._id.toString(),
-    added,
-    removed,
+    platformsAdded,
+    platformsRemoved,
     ...result,
   });
 
@@ -210,6 +210,10 @@ export async function syncUserCalendar(userId: string, options?: { fetchContests
     throw new Error("User not found");
   }
 
+  if (!user.calendarConnected) {
+    return { synced: 0, updated: 0, failed: 0, removed: 0 };
+  }
+
   if (options?.fetchContests) {
     await syncContestsToDatabase();
   }
@@ -234,7 +238,7 @@ export async function syncAllUsersCalendars() {
   logger.info({ event: "cron_calendar_sync_started" });
 
   await syncContestsToDatabase();
-  const users = await User.find({});
+  const users = await User.find({ calendarConnected: true });
   for (const user of users) {
     try {
       await syncUserCalendar(user._id.toString());

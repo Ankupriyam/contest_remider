@@ -1,6 +1,6 @@
 import { google } from "googleapis";
 
-import { getEnv, GOOGLE_SCOPES } from "./config";
+import { getEnv, GOOGLE_BASIC_SCOPES, GOOGLE_CALENDAR_SCOPES } from "./config";
 import { decryptToken, encryptToken } from "./crypto";
 import { logger } from "./logger";
 import { User, type UserDocument } from "@/models/User";
@@ -10,12 +10,16 @@ export function createOAuthClient() {
   return new google.auth.OAuth2(env.GOOGLE_CLIENT_ID, env.GOOGLE_CLIENT_SECRET, `${env.APP_URL}/api/auth/callback/google`);
 }
 
-export function getGoogleAuthUrl(state: string) {
+export function getGoogleAuthUrl(state: string, includeCalendar = false) {
   const client = createOAuthClient();
+  const scopes = includeCalendar
+    ? [...GOOGLE_BASIC_SCOPES, ...GOOGLE_CALENDAR_SCOPES]
+    : GOOGLE_BASIC_SCOPES;
+
   return client.generateAuthUrl({
-    access_type: "offline",
-    prompt: "consent",
-    scope: GOOGLE_SCOPES,
+    access_type: includeCalendar ? "offline" : "online",
+    prompt: includeCalendar ? "consent" : "select_account",
+    scope: scopes,
     state,
   });
 }
@@ -23,10 +27,14 @@ export function getGoogleAuthUrl(state: string) {
 export async function exchangeCodeForTokens(code: string) {
   const client = createOAuthClient();
   const { tokens } = await client.getToken(code);
-  if (!tokens.access_token || !tokens.refresh_token) {
-    throw new Error("Google OAuth did not return required tokens");
+  if (!tokens.access_token) {
+    throw new Error("Google OAuth did not return an access token");
   }
   return tokens;
+}
+
+export function hasCalendarScope(tokens: { scope?: string | null }): boolean {
+  return Boolean(tokens.scope?.includes("calendar.events"));
 }
 
 export async function getGoogleProfile(accessToken: string) {
@@ -45,14 +53,13 @@ export async function getGoogleProfile(accessToken: string) {
   };
 }
 
+/**
+ * Create or update a user after basic sign-in (no calendar scope).
+ * Only updates profile info — never touches tokens/calendar fields.
+ */
 export async function upsertGoogleUser(
   profile: Awaited<ReturnType<typeof getGoogleProfile>>,
-  tokens: Awaited<ReturnType<typeof exchangeCodeForTokens>>,
 ) {
-  const encryptedRefresh = encryptToken(tokens.refresh_token!);
-  const encryptedAccess = encryptToken(tokens.access_token!);
-  const tokenExpiry = new Date(Date.now() + (tokens.expiry_date ?? 3600 * 1000));
-
   const user = await User.findOneAndUpdate(
     { googleId: profile.googleId },
     {
@@ -60,14 +67,36 @@ export async function upsertGoogleUser(
       name: profile.name,
       email: profile.email,
       image: profile.image,
-      refreshToken: encryptedRefresh,
-      accessToken: encryptedAccess,
-      tokenExpiry,
     },
     { upsert: true, new: true, setDefaultsOnInsert: true },
   );
 
   logger.info({ event: "user_login", userId: user._id.toString(), email: user.email });
+  return user;
+}
+
+/**
+ * Upgrade an existing user with calendar tokens after they grant calendar permission.
+ */
+export async function upgradeUserWithCalendar(
+  user: UserDocument,
+  tokens: Awaited<ReturnType<typeof exchangeCodeForTokens>>,
+) {
+  if (!tokens.refresh_token) {
+    throw new Error("Calendar upgrade did not return a refresh token");
+  }
+
+  const encryptedRefresh = encryptToken(tokens.refresh_token);
+  const encryptedAccess = encryptToken(tokens.access_token!);
+  const tokenExpiry = new Date(Date.now() + (tokens.expiry_date ?? 3600 * 1000));
+
+  user.refreshToken = encryptedRefresh;
+  user.accessToken = encryptedAccess;
+  user.tokenExpiry = tokenExpiry;
+  user.calendarConnected = true;
+
+  await user.save();
+  logger.info({ event: "calendar_connected", userId: user._id.toString() });
   return user;
 }
 

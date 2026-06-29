@@ -216,6 +216,12 @@ function Dashboard() {
   const anyEnabled = Object.values(enabled).some(Boolean);
 
   const togglePlatform = (platformId: string, value: boolean) => {
+    // If turning ON a platform and calendar is not yet connected, redirect to grant calendar permission
+    if (value && !user!.calendarConnected) {
+      window.location.href = `/api/auth/connect/calendar?platform=${platformId}`;
+      return;
+    }
+
     const nextEnabled = { ...enabled, [platformId]: value };
     setOptimisticEnabled(nextEnabled);
     setSyncingPlatform(platformId);
@@ -432,9 +438,16 @@ function Dashboard() {
                   </p>
                 </div>
               </div>
-              <button className="flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-1.5 text-xs text-emerald-300 ring-1 ring-emerald-400/30">
-                <Check className="h-3.5 w-3.5" />{" "}
-                {user.calendarConnected ? "Connected" : "Disconnected"}
+              <button
+                onClick={() => !user.calendarConnected && (window.location.href = "/api/auth/connect/calendar")}
+                className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs ring-1 ${
+                  user.calendarConnected
+                    ? "bg-emerald-500/15 text-emerald-300 ring-emerald-400/30"
+                    : "bg-white/5 text-white/60 ring-white/15 hover:bg-white/10 cursor-pointer"
+                }`}
+              >
+                {user.calendarConnected ? <Check className="h-3.5 w-3.5" /> : null}
+                {user.calendarConnected ? "Connected" : "Not connected"}
               </button>
             </div>
             <div className="flex items-center justify-between gap-4 py-4">

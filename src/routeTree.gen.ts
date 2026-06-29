@@ -9,18 +9,32 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TermsRouteImport } from './routes/terms'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiUserRouteImport } from './routes/api/user'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
+import { Route as ApiCronRouteImport } from './routes/api/cron'
 import { Route as ApiContestsRouteImport } from './routes/api/contests'
 import { Route as ApiUserPreferencesRouteImport } from './routes/api/user/preferences'
 import { Route as ApiCalendarSyncRouteImport } from './routes/api/calendar/sync'
 import { Route as ApiAuthSignoutRouteImport } from './routes/api/auth/signout'
 import { Route as ApiAuthSessionRouteImport } from './routes/api/auth/session'
 import { Route as ApiAuthSigninGoogleRouteImport } from './routes/api/auth/signin/google'
+import { Route as ApiAuthConnectCalendarRouteImport } from './routes/api/auth/connect/calendar'
 import { Route as ApiAuthCallbackGoogleRouteImport } from './routes/api/auth/callback/google'
 
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -39,6 +53,11 @@ const ApiUserRoute = ApiUserRouteImport.update({
 const ApiHealthRoute = ApiHealthRouteImport.update({
   id: '/api/health',
   path: '/api/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCronRoute = ApiCronRouteImport.update({
+  id: '/api/cron',
+  path: '/api/cron',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiContestsRoute = ApiContestsRouteImport.update({
@@ -71,6 +90,11 @@ const ApiAuthSigninGoogleRoute = ApiAuthSigninGoogleRouteImport.update({
   path: '/api/auth/signin/google',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAuthConnectCalendarRoute = ApiAuthConnectCalendarRouteImport.update({
+  id: '/api/auth/connect/calendar',
+  path: '/api/auth/connect/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthCallbackGoogleRoute = ApiAuthCallbackGoogleRouteImport.update({
   id: '/api/auth/callback/google',
   path: '/api/auth/callback/google',
@@ -80,7 +104,10 @@ const ApiAuthCallbackGoogleRoute = ApiAuthCallbackGoogleRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/privacy': typeof PrivacyRoute
+  '/terms': typeof TermsRoute
   '/api/contests': typeof ApiContestsRoute
+  '/api/cron': typeof ApiCronRoute
   '/api/health': typeof ApiHealthRoute
   '/api/user': typeof ApiUserRouteWithChildren
   '/api/auth/session': typeof ApiAuthSessionRoute
@@ -88,12 +115,16 @@ export interface FileRoutesByFullPath {
   '/api/calendar/sync': typeof ApiCalendarSyncRoute
   '/api/user/preferences': typeof ApiUserPreferencesRoute
   '/api/auth/callback/google': typeof ApiAuthCallbackGoogleRoute
+  '/api/auth/connect/calendar': typeof ApiAuthConnectCalendarRoute
   '/api/auth/signin/google': typeof ApiAuthSigninGoogleRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/privacy': typeof PrivacyRoute
+  '/terms': typeof TermsRoute
   '/api/contests': typeof ApiContestsRoute
+  '/api/cron': typeof ApiCronRoute
   '/api/health': typeof ApiHealthRoute
   '/api/user': typeof ApiUserRouteWithChildren
   '/api/auth/session': typeof ApiAuthSessionRoute
@@ -101,13 +132,17 @@ export interface FileRoutesByTo {
   '/api/calendar/sync': typeof ApiCalendarSyncRoute
   '/api/user/preferences': typeof ApiUserPreferencesRoute
   '/api/auth/callback/google': typeof ApiAuthCallbackGoogleRoute
+  '/api/auth/connect/calendar': typeof ApiAuthConnectCalendarRoute
   '/api/auth/signin/google': typeof ApiAuthSigninGoogleRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/privacy': typeof PrivacyRoute
+  '/terms': typeof TermsRoute
   '/api/contests': typeof ApiContestsRoute
+  '/api/cron': typeof ApiCronRoute
   '/api/health': typeof ApiHealthRoute
   '/api/user': typeof ApiUserRouteWithChildren
   '/api/auth/session': typeof ApiAuthSessionRoute
@@ -115,6 +150,7 @@ export interface FileRoutesById {
   '/api/calendar/sync': typeof ApiCalendarSyncRoute
   '/api/user/preferences': typeof ApiUserPreferencesRoute
   '/api/auth/callback/google': typeof ApiAuthCallbackGoogleRoute
+  '/api/auth/connect/calendar': typeof ApiAuthConnectCalendarRoute
   '/api/auth/signin/google': typeof ApiAuthSigninGoogleRoute
 }
 export interface FileRouteTypes {
@@ -122,7 +158,10 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/dashboard'
+    | '/privacy'
+    | '/terms'
     | '/api/contests'
+    | '/api/cron'
     | '/api/health'
     | '/api/user'
     | '/api/auth/session'
@@ -130,12 +169,16 @@ export interface FileRouteTypes {
     | '/api/calendar/sync'
     | '/api/user/preferences'
     | '/api/auth/callback/google'
+    | '/api/auth/connect/calendar'
     | '/api/auth/signin/google'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/dashboard'
+    | '/privacy'
+    | '/terms'
     | '/api/contests'
+    | '/api/cron'
     | '/api/health'
     | '/api/user'
     | '/api/auth/session'
@@ -143,12 +186,16 @@ export interface FileRouteTypes {
     | '/api/calendar/sync'
     | '/api/user/preferences'
     | '/api/auth/callback/google'
+    | '/api/auth/connect/calendar'
     | '/api/auth/signin/google'
   id:
     | '__root__'
     | '/'
     | '/dashboard'
+    | '/privacy'
+    | '/terms'
     | '/api/contests'
+    | '/api/cron'
     | '/api/health'
     | '/api/user'
     | '/api/auth/session'
@@ -156,24 +203,43 @@ export interface FileRouteTypes {
     | '/api/calendar/sync'
     | '/api/user/preferences'
     | '/api/auth/callback/google'
+    | '/api/auth/connect/calendar'
     | '/api/auth/signin/google'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRoute
+  PrivacyRoute: typeof PrivacyRoute
+  TermsRoute: typeof TermsRoute
   ApiContestsRoute: typeof ApiContestsRoute
+  ApiCronRoute: typeof ApiCronRoute
   ApiHealthRoute: typeof ApiHealthRoute
   ApiUserRoute: typeof ApiUserRouteWithChildren
   ApiAuthSessionRoute: typeof ApiAuthSessionRoute
   ApiAuthSignoutRoute: typeof ApiAuthSignoutRoute
   ApiCalendarSyncRoute: typeof ApiCalendarSyncRoute
   ApiAuthCallbackGoogleRoute: typeof ApiAuthCallbackGoogleRoute
+  ApiAuthConnectCalendarRoute: typeof ApiAuthConnectCalendarRoute
   ApiAuthSigninGoogleRoute: typeof ApiAuthSigninGoogleRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
@@ -200,6 +266,13 @@ declare module '@tanstack/react-router' {
       path: '/api/health'
       fullPath: '/api/health'
       preLoaderRoute: typeof ApiHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cron': {
+      id: '/api/cron'
+      path: '/api/cron'
+      fullPath: '/api/cron'
+      preLoaderRoute: typeof ApiCronRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/contests': {
@@ -244,6 +317,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSigninGoogleRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/auth/connect/calendar': {
+      id: '/api/auth/connect/calendar'
+      path: '/api/auth/connect/calendar'
+      fullPath: '/api/auth/connect/calendar'
+      preLoaderRoute: typeof ApiAuthConnectCalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/callback/google': {
       id: '/api/auth/callback/google'
       path: '/api/auth/callback/google'
@@ -268,13 +348,17 @@ const ApiUserRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRoute,
+  PrivacyRoute: PrivacyRoute,
+  TermsRoute: TermsRoute,
   ApiContestsRoute: ApiContestsRoute,
+  ApiCronRoute: ApiCronRoute,
   ApiHealthRoute: ApiHealthRoute,
   ApiUserRoute: ApiUserRouteWithChildren,
   ApiAuthSessionRoute: ApiAuthSessionRoute,
   ApiAuthSignoutRoute: ApiAuthSignoutRoute,
   ApiCalendarSyncRoute: ApiCalendarSyncRoute,
   ApiAuthCallbackGoogleRoute: ApiAuthCallbackGoogleRoute,
+  ApiAuthConnectCalendarRoute: ApiAuthConnectCalendarRoute,
   ApiAuthSigninGoogleRoute: ApiAuthSigninGoogleRoute,
 }
 export const routeTree = rootRouteImport

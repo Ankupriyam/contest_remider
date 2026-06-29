@@ -36,9 +36,15 @@ export function getEnv(): Env {
   return cachedEnv;
 }
 
-export const GOOGLE_SCOPES = [
+export const GOOGLE_BASIC_SCOPES = [
   "openid",
   "email",
   "profile",
+];
+
+export const GOOGLE_CALENDAR_SCOPES = [
   "https://www.googleapis.com/auth/calendar.events",
 ];
+
+/** @deprecated Use GOOGLE_BASIC_SCOPES or GOOGLE_CALENDAR_SCOPES */
+export const GOOGLE_SCOPES = [...GOOGLE_BASIC_SCOPES, ...GOOGLE_CALENDAR_SCOPES];

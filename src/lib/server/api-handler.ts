@@ -44,6 +44,6 @@ export function toUserProfile(user: UserDocument) {
     image: user.image,
     reminderMinutes: user.reminderMinutes,
     selectedPlatforms: user.selectedPlatforms,
-    calendarConnected: Boolean(user.refreshToken),
+    calendarConnected: Boolean(user.calendarConnected),
   };
 }
