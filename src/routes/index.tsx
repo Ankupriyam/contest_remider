@@ -78,9 +78,19 @@ function LoginPage() {
           <ShinyText text="a contest." className="block" />
         </h1>
 
-        <p className="mt-8 max-w-xl text-sm text-white/80 md:text-base">
-          One click connects your Google Calendar to LeetCode, Codeforces, CodeChef, and AtCoder.
-        </p>
+        <div className="mt-8 max-w-xl text-center">
+          <p className="text-sm text-white/80 md:text-base">
+            One click connects your Google Calendar to LeetCode, Codeforces, CodeChef, and AtCoder.
+          </p>
+
+          <div className="mt-8 rounded-2xl bg-white/5 border border-white/10 p-6 text-left">
+            <h2 className="text-lg font-semibold text-white mb-2">👉 Google Calendar Integration</h2>
+            <p className="text-white/90 font-medium mb-1">Add contests to Google Calendar</p>
+            <p className="text-sm text-white/70">
+              Users can sync contest reminders directly to Google Calendar. We automatically detect upcoming programming competitions and seamlessly schedule them in your connected calendar so you never miss a match.
+            </p>
+          </div>
+        </div>
 
         {error ? (
           <p className="mt-6 text-sm text-red-300">
