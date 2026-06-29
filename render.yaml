@@ -12,5 +12,5 @@ services:
     name: contest-reminder-cron
     env: node
     plan: free
-    schedule: "*/15 * * * *"
+    schedule: "0 * * * *"
     command: curl -s $APP_URL/api/cron
