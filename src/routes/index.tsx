@@ -55,9 +55,6 @@ function LoginPage() {
 
       <header className="relative z-10 mx-auto flex max-w-7xl items-center justify-between px-6 py-6">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-white">
-            <div className="h-2.5 w-2.5 rounded-full bg-white" />
-          </div>
           <span className="text-base font-medium tracking-tight">Contest Reminder</span>
         </div>
         <button className="lg:hidden" aria-label="Menu">
